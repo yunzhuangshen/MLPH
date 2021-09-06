@@ -18,7 +18,7 @@ The python code requires:
 - scipy 
 - bayesian-optimization - https://github.com/fmfn/BayesianOptimization 
 
-## Run the scrips in order to reproduce results:
+## Running scrips to reproduce results:
 1. python3 01-train-and-optimize.py
 2. python3 02-cg.py (nCPUs $\in [4,8,12...]$)
 3. python3 03-bp.py (nCPUs $\in [1,2,3,...]$)

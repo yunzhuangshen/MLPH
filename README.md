@@ -31,21 +31,23 @@ Two newly created folders:
 - `results_cg' contains the results for column generation
 - `results_bp' containing the results for branch-and-price
 
-The result files are either latex tables or data for ploting figures in the main paper as follows: 
-- data for ploting Figure 2: 
+The result files are either data for ploting figures or latex tables in the main paper: 
+- data for Figure 2: 
     - 'results_cg/small/lp-curve'
     - 'results_cg/small/solving-curve'
-- data for ploting Figure 3:
+- data for Figure 3:
     - 'results_cg/small/compare_figure.txt'
     - 'results_cg/small/compare_number.txt'
-- data for ploting Figure 4:
+- data for Figure 4:
     - 'results_cg/cs-large/lp-curve-cg'
     - 'results_cg/cs-large/lp-cg'
-- data for ploting Figure 5:
+- data for Figure 5:
     - 'results_bp/gap_curve_BP_MLPH_10._1._0.1-BP_def'
-- data for Table 2:
+- Table 2:
     - 'results_cg/large/table_solving_stats.tex'
-- data for Table 3:
+- Table 3:
     - 'results_cg/large/table_rc.tex'  
-- data for Table 4-6:
-    - 'results_bp/table_BP_MLPH_10._1._0.1-BP_def'
+- Table 4-6:
+    - 'results_bp/table_BP_MLPH_10._1._0.1-BP_def/time_for_all_solved/*.tex'
+    - 'results_bp/table_BP_MLPH_10._1._0.1-BP_def/gap_for_all_not_solved/*.tex'
+    - 'results_bp/table_BP_MLPH_10._1._0.1-BP_def/number_solve_for_not_all_solved/*.tex'

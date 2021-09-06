@@ -15,6 +15,7 @@ def test_pricing_methods(graph_type):
         test_methods = [MLPH, ACO, TSM, LSCC, FASTWCLQ, GUROBI, GUROBI_HEUR]
     else:
         test_methods = [MLPH, ACO, FASTWCLQ, GUROBI, GUROBI_HEUR]
+        nCPUs = max(1, nCPUs//4) # large graphs require 4 CPUs each run
 
     pairs = [(test_method, seed) for test_method in test_methods for seed in seeds]
     nb_runs = len(pairs)
@@ -56,6 +57,7 @@ def test_pricing_methods(graph_type):
         
 
 def test_column_selection():
+    nCPUs = max(1, nCPUs//4) # large graphs require 4 CPUs each run
     cs_methods = [ADD_ALL, REPLACE_EXISTING]
     pairs = [(test_method, seed) for test_method in cs_methods for seed in seeds]
     nb_runs = len(pairs)
@@ -95,7 +97,8 @@ def test_column_selection():
 
 if __name__ =='__main__':
     
-    nCPUs = 2; 
+
+    nCPUs = 4; # should be multiples of 4 
     test_pricing_methods(SMALL_GRAPHS)
     test_pricing_methods(LARGE_GRAPHS)
     test_column_selection()

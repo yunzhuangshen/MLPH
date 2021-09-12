@@ -45,30 +45,36 @@ def make_cg_table(seeds, methods, method_rets, inst_names, outdir_name):
     stats_fname = f"{outdir_name}/cg_stats.csv"
     stats_file = open(stats_fname, 'w')
     for inst_id, inst_name in enumerate(inst_names): 
-        # optimal_count = 0
-        # for method_id, method in enumerate(methods):
-        #     optimal_count += ret[inst_id][method_id][0]
+        optimal_count = 0
+        for method_id, method in enumerate(methods):
+            optimal_count += ret[inst_id][method_id][0]
 
-        # if optimal_count == 0:
-        #     continue
+        if optimal_count == 0:
+            continue
         
-        stats_file.write(inst_name)
+                # avg cg iter success, avg cg iter unsuccess, success_rate.
 
-        # avg cg iter success, avg cg iter unsuccess, success_rate.
-        for val_id in range(1,4):
-            for method_id, method in enumerate(methods):
-                tmp = 'N/A'
-                if (val_id==1 or val_id==2):
-                    if not np.isnan(ret[inst_id][method_id][val_id]):
-                        tmp = round(ret[inst_id][method_id][val_id],1)
-                elif val_id==3:
-                    tmp = round(ret[inst_id][method_id][val_id],2)
-                else:
-                    tmp = round(ret[inst_id][method_id][val_id],1)
-                
-                stats_file.write(f',{tmp}')
-        stats_file.write('\n')
+        stats_file.write(f'{inst_name}')
+        for method_id, method in enumerate(methods):
+            tmp1 = int(ret[inst_id][method_id][0])
+            tmp2 = 'N/A' if np.isnan(ret[inst_id][method_id][1]) else round(ret[inst_id][method_id][1],1)
+            stats_file.write(f',{tmp2} ({tmp1})')
+        for method_id, method in enumerate(methods):
+            tmp1 = len(seeds) - int(ret[inst_id][method_id][0])
+            tmp2 = 'N/A' if np.isnan(ret[inst_id][method_id][2]) else round(ret[inst_id][method_id][2],1)
+            stats_file.write(f',{tmp2} ({tmp1})')
+        stats_file.write(f'\n')
 
     stats_file.close()
     os.system(f'tably -n {stats_fname} > {outdir_name}/table_cg.tex')
     os.remove(stats_fname)
+
+if __name__ == '__main__':
+    prefix='./'
+    seeds = [i for i in range(1, 25)]
+    methods = ['mlph_cs0','aco','gurobi','gurobi_heur','tsm','fastwclq','lscc']
+    method_rets = [f'{prefix}/results_small/{m}' for m in methods]
+    inst_names, t_means = get_test_inst_names_lp_sorted(seeds, methods, method_rets, 'small', prefix=prefix)
+    dest_dir = f'{prefix}/../results_cg/small/'
+    os.makedirs(dest_dir,exist_ok=True)
+    make_cg_table(seeds, methods, method_rets, inst_names, dest_dir)

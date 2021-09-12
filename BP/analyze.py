@@ -20,3 +20,7 @@ def analyze_MLPH_variants(prefix='./'):
     make_tables(method1, method2, prefix)
     method1='BP_MLPH_10._1._0.1'; method2='BP_MLPH_0.1_1._0.1'
     make_tables(method1, method2, prefix)
+
+if __name__ == '__main__':
+    analyze()
+    analyze_MLPH_variants()

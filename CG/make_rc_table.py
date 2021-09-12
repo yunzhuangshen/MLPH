@@ -3,7 +3,8 @@ from utils import *
 def make_rc_table(seeds, methods, method_rets, inst_names, outdir_name):
 
     ret = [[ np.zeros(3) for j in range(len(methods))] for i in range(len(inst_names))]
-
+    geo_mean_nb_nrc_cols = [[] for method in methods]
+    geo_mean_min_nrc = [[] for method in methods]
     for inst_id, inst_name in enumerate(inst_names): 
         for method_id, (method, method_ret) in enumerate(zip(methods, method_rets)):
             for seed in seeds:
@@ -27,10 +28,18 @@ def make_rc_table(seeds, methods, method_rets, inst_names, outdir_name):
 
                 tmp=np.array([nb_nrc_cols, min_nrc, mean_nrc])
                 ret[inst_id][method_id] += tmp
-        
+                geo_mean_nb_nrc_cols[method_id].append(nb_nrc_cols)
+                geo_mean_min_nrc[method_id].append(-min_nrc)
             ret[inst_id][method_id][0] /= len(seeds)
             ret[inst_id][method_id][1] /= len(seeds)
             ret[inst_id][method_id][2] /= len(seeds)
+
+    stats_fname = f"{outdir_name}/rc_mean_stats.csv"
+    stats_file = open(stats_fname, 'w')
+    stats_file.write("method,num_nrc_col,min_nrc\n")
+    for method_id, method in enumerate(methods):
+        stats_file.write(f"{method},{round(gmean(geo_mean_nb_nrc_cols[method_id]),1)},{round(-gmean(geo_mean_min_nrc[method_id]),2)}\n")
+    stats_file.close()
 
     stats_fname = f"{outdir_name}/rc_stats.csv"
     stats_file = open(stats_fname, 'w')
@@ -56,3 +65,13 @@ def make_rc_table(seeds, methods, method_rets, inst_names, outdir_name):
     stats_file.close()
     os.system(f'tably -n {stats_fname} > {outdir_name}/table_rc.tex')
     os.remove(stats_fname)
+
+if __name__ == '__main__':
+    prefix='./'
+    seeds = [i for i in range(1, 25)]
+    methods = ['mlph_cs0','aco','gurobi','gurobi_heur','tsm','fastwclq','lscc']
+    method_rets = [f'{prefix}/results_small/{m}' for m in methods]
+    inst_names, t_means = get_test_inst_names_lp_sorted(seeds, methods, method_rets, 'small', prefix=prefix)
+    dest_dir = f'{prefix}/../results_cg/small/'
+    os.makedirs(dest_dir,exist_ok=True)
+    make_rc_table(seeds, methods, method_rets, inst_names, dest_dir)

@@ -134,7 +134,8 @@ def make_stats_table(methods, method_rets, inst_names, seeds, win_dict, prefix_p
     none_win_insts = win_dict['none']
     
     # generate table containing full statistics
-    columns = [OPTIMALITY, ROOT_SOLVED, GAP, TOTAL_TIME,HEUR_TIME,EXACT_TIME,NNODES]
+    # columns = [OPTIMALITY, ROOT_SOLVED, GAP, TOTAL_TIME,HEUR_TIME,EXACT_TIME,NNODES]
+    columns = [OPTIMALITY, ROOT_SOLVED, GAP, TOTAL_TIME]
     gen_latex(records_all, columns, method1_win_insts, methods, methods[0], prefix_path, dest_dir)
     gen_latex(records_all, columns, method2_win_insts, methods, methods[1], prefix_path, dest_dir)
     gen_latex(records_all, columns, none_win_insts, methods, 'none', prefix_path, dest_dir)

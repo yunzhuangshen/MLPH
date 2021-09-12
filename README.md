@@ -18,7 +18,7 @@ The python code requires:
 - scipy 
 - bayesian-optimization - https://github.com/fmfn/BayesianOptimization 
 
-## Running scrips to reproduce results:
+## Run scrips to reproduce results:
 1. python3 01-train-and-optimize.py
 2. python3 02-cg.py (nCPUs $\in [4,8,12...]$)
 3. python3 03-bp.py (nCPUs $\in [1,2,3,...]$)
@@ -27,11 +27,11 @@ The python code requires:
 For the second and third step, you can specificy the number of available CPUs in the python script.
 
 ## Results
-Two newly created folders:
+The results are in the two newly created folders:
 - `results_cg' contains the results for column generation
 - `results_bp' containing the results for branch-and-price
 
-The result files are either data for ploting figures or latex tables in the main paper: 
+The Figures and Tables in our main paper corresonponds to the results files respectively: 
 - data for Figure 2: 
     - 'results_cg/small/lp-curve'
     - 'results_cg/small/solving-curve'

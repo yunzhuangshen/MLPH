@@ -38,33 +38,20 @@
 #include "BP/heur_init.h"
 using namespace std;
 
-/**
-
-command to run: ./BP [graph name] [heuristic pricer] [exact pricer] [branch-and-price cutoff time] [sample number]
-
-heuristic pricer:
-- 0 GREEDY
-- 1 MSSP
-- 2 SSSP
-- 3 ACO
-- 4 GUROBI
-- 5 GUROBI_HEUR
-- 6 TSM
-- 7 FASTWCLQ
-- 8 LSCC
-- 9 None
-- 10 MSSP_MIX
-exact pricer:
-- 0 tclique
-- 1 tsm
-- 2 gurobi
-*/
-
 string to_string_remove_trailing_zeros(double d){
   string s = to_string(d);
    s.erase(s.find_last_not_of('0')+1, std::string::npos);
    return s;
 }
+
+
+/**
+
+command to run: ./BP [graph name] [heuristic pricer] [branch-and-price cutoff time] [sample number]
+
+heuristic pricer: BP_DEF=0, BP_None=1, BP_MLPH=2, BP_MLPH_FORCE_EXACT=3
+*/
+
 
 int
 main(
@@ -75,7 +62,6 @@ main(
    string prob_dir = "../../GCB/";
    double cutoff_bp = 8000;
    double cutoff_pricing=30;
-   EXACT_PRICER exact_pricer_type = static_cast<EXACT_PRICER>(0);
 
    string prob_name = argv[1]; // 1-FullIns_3
    string prob_path = prob_dir + prob_name + ".col";
@@ -93,9 +79,11 @@ main(
    } else if (method_type==METHOD_TYPE::BP_MLPH_FORCE_EXACT){
       out_dir= "../results/BP_MLPH_force_exact/" + to_string(seed) + "/";
    } else if (method_type==METHOD_TYPE::BP_MLPH){
-      sample_factor = stod(argv[4]);
-      root_column_limit_factor = stod(argv[5]);
-      child_column_limit_factor = stod(argv[6]);
+      if (argc > 5){
+         sample_factor = stod(argv[4]);
+         root_column_limit_factor = stod(argv[5]);
+         child_column_limit_factor = stod(argv[6]);
+      }
       out_dir= "../results/BP_MLPH_" + to_string_remove_trailing_zeros(sample_factor) + "_" 
          + to_string_remove_trailing_zeros(root_column_limit_factor) + "_" + to_string_remove_trailing_zeros(child_column_limit_factor) +"/" + to_string(seed) + "/";
    } else {
@@ -108,7 +96,7 @@ main(
    SCIP_CALL( SCIPcreate(&scip) );
    SCIP_CALL( SCIPincludeColoringPlugins(scip));
    SCIP_CALL( SCIPincludeHeurInit(scip, seed));
-   SCIP_CALL( SCIPincludePricerColoring(scip, method_type, EXACT_PRICER::TCLIQUE, cutoff_bp, cutoff_pricing, sample_factor, root_column_limit_factor, child_column_limit_factor));
+   SCIP_CALL( SCIPincludePricerColoring(scip, method_type, cutoff_bp, cutoff_pricing, sample_factor, root_column_limit_factor, child_column_limit_factor));
    retcode = SCIPreadProb(scip, prob_path.c_str(), NULL);
 
    switch( retcode )

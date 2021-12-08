@@ -9,14 +9,14 @@ argv[1] options:
 
 - 4-11: test heuristic pricing methods 
     - argv[1]:
-        - 6: test mlph
-        - 7: test aco 
-        - 8: test tsm 
-        - 9: test lscc 
-        - 10: test fastwclq 
-        - 11: test gurobi  
+        - 6: test MLPH
+        - 7: test ACO 
+        - 8: test TSM 
+        - 9: test LSCC 
+        - 10: test Fastwclq 
+        - 11: test Gurobi  
     - argv[2] is the benchmark set: 0 for small-scale graphs and 1 for large-scale graphs
-    - argv[3] is the test problem index, and -1 for test all problems
+    - argv[3] is the test problem index. -1 for test all problems
     - argv[4] is the column selection method
         - 0: add-partial
         - 1: add-all

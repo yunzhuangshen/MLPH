@@ -103,7 +103,8 @@ def test_variants():
 
 if __name__ =='__main__':
     
-    nCPUs = 2; 
+    nCPUs = 8; 
+    os.system(f'mkdir BP/build; cd BP/build && cmake ../ && make')
     test(); test_variants(); 
     analyze(prefix='./BP/')
     analyze_MLPH_variants(prefix='./BP/')

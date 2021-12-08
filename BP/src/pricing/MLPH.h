@@ -47,9 +47,8 @@ namespace GCP{
             MLPH(bool is_root, METHOD_TYPE variant, double cutoff, MWISP_INST& inst, double sample_factor);
             void run();
             void random_sampling();
-            double calc_dist(vector<int> sample);
-            void make_prediction(int ith_iteration);            
-            void run_iteration(int ith_iteration);           
+            void make_prediction();            
+            void _run();           
             void compute_correlation_based_measure();
             void compute_ranking_based_measure();    
             void compute_bound();

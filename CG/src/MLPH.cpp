@@ -19,10 +19,8 @@ namespace GCP {
         sample_size = _sample_size;
         upper_col_limit = _upper_col_limit;
         niterations = 1;
-        best_rc_current_iteration = vector<double>(niterations);
-        num_neg_rc_current_iteration = vector<long>(niterations);
         heur_best_reduced_cost = 1;
-        assert(method>=4 && method<=6);
+        assert(method==6);
 
         c0=1.6557295690309566;
         c1=-1.061904300496613;
@@ -67,14 +65,12 @@ namespace GCP {
             
         dual_values = _dual_values;
         method = _method;
-        assert(method>=4 && method<=6);
+        assert(method==6);
         nb_node = _n;
         cutoff = _cutoff;
         sample_size = _sample_size;
         upper_col_limit = _upper_col_limit;
         niterations = 50;
-        best_rc_current_iteration = vector<double>(niterations);
-        num_neg_rc_current_iteration = vector<long>(niterations);
         heur_best_reduced_cost = 1;
 
         c0=1.6557295690309566;
@@ -295,7 +291,7 @@ namespace GCP {
         }
     }
 
-    void MLPH::make_prediction(int ith_iteration){
+    void MLPH::make_prediction(){
         compute_correlation_based_measure();
         compute_ranking_based_measure();
         predicted_value = std::vector<float>(nb_node, 0);
@@ -316,45 +312,16 @@ namespace GCP {
         }
     }
 
-    inline double MLPH::calc_dist(vector<int> sample){
-        double dist = 0.;
-        vector<int> onehot(nb_node,0);
-        for (auto v : sample) onehot[v] = 1;
-        for (auto i = 0; i < nb_node; i++)
-            dist += abs(onehot[i] - predicted_value[i]);
-        return dist;
-    }
-
     void MLPH::run(){
         start_time=get_wall_time();
         random_sampling();
-        bool use_mssp = (method != 6);
-        for (auto i = 0; i < niterations; ++i){
-            if (use_mssp || i==0){
-                this->make_prediction(i);
-            }
-
-            this->run_iteration(i);
-            
-            int nrc_cols_cur_iteration = 0;
-            for (auto idx = 0; idx < sample_size; idx++){
-                if (1 - objs[idx] < THRESHOLD){
-                    nrc_cols_cur_iteration++;
-                }
-            }
-            
-            best_rc_current_iteration[i] = heur_best_reduced_cost;
-            num_neg_rc_current_iteration[i] = nrc_cols_cur_iteration;
-            if (get_wall_time() - start_time > cutoff)
-                break;
-        }
-
+        this->make_prediction();
+        this->_run();
         compute_statistics();
-        cout << "dominate_selection_time: " << dominate_selection_time << "\n";
     }
 
 
-    void MLPH::run_iteration(int ith_iteration){
+    void MLPH::_run(){
 
         long time_seed = current_time_for_seeding();        
         #pragma omp parallel
@@ -429,10 +396,6 @@ namespace GCP {
                     ss << sample[k] << " ";
                 }
                 std::string identity = ss.str();  
-                double dist;
-                if (method==4){
-                    dist = calc_dist(sample);
-                }
                 #pragma omp critical
                 {
                     if (best_obj < obj)
@@ -443,112 +406,10 @@ namespace GCP {
                             neg_rc_vals.push_back(1-obj);
                             identites.insert(identity);
                     }
-
-                    // replace worst solution
-                    if (method == 5){
-                        if (!duplicate){
-                            auto min_obj = 1e10; 
-                            int min_idx = -1;
-                            for (auto l = 0; l < sample_size; l++){
-                                if (objs[l] < min_obj){
-                                    min_obj = objs[l];
-                                    min_idx = l;
-                                }
-                            }
-                            if (obj > objs[min_idx]){   
-                                objs[min_idx] = obj;
-                                mis_set[min_idx].resize(sample.size());
-                                std::copy(sample.begin(), sample.end(), mis_set[min_idx].begin());
-                            }
-                        }
-                    }else if (method == 4){
-                        if (!duplicate){
-                            objs.push_back(obj);
-                            mis_set.push_back(sample);
-                            dists.push_back(dist);
-                        }
-                    // compare and replace the current solution
-                    }else if (method==6){
-                        // do nothing!
-                        // if (!duplicate && obj > objs[idx]){   
-                        //     objs[idx] = obj;
-                        //     mis_set[idx].resize(sample.size());
-                        //     std::copy(sample.begin(), sample.end(), mis_set[idx].begin());
-                        // }
-                    }else{
-                        cout << "ERROR: at CG-MLPH run_iteration()\n";
-                        assert(false);
-                    }
                 }
             }
         }
 
         heur_best_reduced_cost = 1-best_obj;
-
-        // currently the mis_set is larger than the sample size
-        // we should shrink the mis_set
-        if (method == 4){
-            auto t0 = get_wall_time();
-            fast_nondominated_sort();
-            dominate_selection_time += get_wall_time() - t0;
-        }
-    }
-
-    // select mis samples in order of the dominant front
-    // until adding the sample size is equal to parameter sample_size 
-    void MLPH::fast_nondominated_sort(){
-            //second objective
-        dists = vector<double> (mis_set.size());
-        vector<int> domination_cout(mis_set.size(),0);
-        vector<int> rank(mis_set.size(),-1);        
-        vector<vector<int>> dominated_solutions(mis_set.size(),vector<int>());
-        vector<vector<int>> fronts(1, vector<int>());
-        vector<vector<int>> selected_mis;
-        for (auto i = 0; i < mis_set.size();i++)
-            dists[i] = calc_dist(mis_set[i]);   
-            
-        for (auto mis_idx_i = 0; mis_idx_i < mis_set.size();mis_idx_i++){
-            for (auto mis_idx_j=0; mis_idx_j < mis_set.size(); mis_idx_j++){
-                if (mis_idx_i == mis_idx_j) continue;
-                if (check_dominance(mis_idx_i, mis_idx_j)){
-                    dominated_solutions[mis_idx_i].push_back(mis_idx_j);
-                }else if (check_dominance(mis_idx_j, mis_idx_i)){
-                    domination_cout[mis_idx_i]++;
-                }
-            }
-            if (domination_cout[mis_idx_i]==0){
-                fronts[0].push_back(mis_idx_i);
-                rank[mis_idx_i]=0;
-                selected_mis.push_back(mis_set[mis_idx_i]);
-            }
-        }
-        int i = 0;
-        while(fronts[i].size()>0){
-            vector<int> current_front;
-            for (auto mis_idx_i : fronts[i]){
-                for (auto mis_idx_j : dominated_solutions[mis_idx_i]){
-                    domination_cout[mis_idx_j]--;
-                    if (domination_cout[mis_idx_j]==0){
-                        rank[mis_idx_j] = i+1;
-                        current_front.push_back(mis_idx_j);
-                        selected_mis.push_back(mis_set[mis_idx_j]);
-                        if (selected_mis.size()==sample_size){
-                            mis_set = selected_mis;
-                            return;
-                        }
-                    }
-                }
-            }
-            i = i+1;
-            fronts.push_back(current_front);
-        }
-        assert(false);
-    }
-
-    inline bool MLPH::check_dominance(int ind1, int ind2){
-        if ((objs[ind1] > objs[ind2] && dists[ind1] >= dists[ind2]) || 
-            (dists[ind1] > dists[ind2] && objs[ind1] >= objs[ind2]))
-            return true;
-        return false;
     }
 }

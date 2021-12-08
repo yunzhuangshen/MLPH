@@ -65,7 +65,7 @@ namespace GCP{
 
         void collect_training_data(vector<vector<double>>& obj_coef, vector<vector<bool>>& solution);
         double optimize_LM(int method, double b0, double b1);
-        void test(int method, int column_selection, std::ofstream* output_file_mssp_stats=nullptr, std::ofstream* output_file_cg_stats=nullptr);        
+        void test(int method, int column_selection, std::ofstream* output_file_cg_stats=nullptr);        
     };
 }
 

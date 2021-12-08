@@ -14,8 +14,7 @@ find_package(Gurobi)
 include_directories(SYSTEM ${GUROBI_INCLUDE_DIRS})
 include_directories(SYSTEM "/usr/local/lib/")
 
-add_executable(CG ${SOURCE_FILES} ${CMAKE_CURRENT_SOURCE_DIR}/prebuild/fastcluster.o)
-
+add_executable(CG ${SOURCE_FILES})
 target_include_directories(CG PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/src/svm"
 				       "${CMAKE_CURRENT_SOURCE_DIR}/src/linear_svm"
 				       "${CMAKE_CURRENT_SOURCE_DIR}/src/linear_svm/blas")

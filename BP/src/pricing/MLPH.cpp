@@ -235,7 +235,7 @@ namespace GCP {
         }
     }
 
-    void MLPH::make_prediction(int ith_iteration){
+    void MLPH::make_prediction(){
         compute_correlation_based_measure();
         compute_ranking_based_measure();
         predicted_value = std::vector<float>(nb_node, 0);
@@ -256,38 +256,17 @@ namespace GCP {
         }
     }
 
-    inline double MLPH::calc_dist(vector<int> sample){
-        double dist = 0.;
-        vector<int> onehot(nb_node,0);
-        for (auto v : sample) onehot[v] = 1;
-        for (auto i = 0; i < nb_node; i++)
-            dist += abs(onehot[i] - predicted_value[i]);
-        return dist;
-    }
+
 
     void MLPH::run(){
         start_time=get_wall_time();
         random_sampling();
-        for (auto i = 0; i < niterations; ++i){
-            if (variant==METHOD_TYPE::BP_MLPH_PLUS || i==0){
-                this->make_prediction(i);
-            }
-
-            this->run_iteration(i);
-            
-            int nrc_cols_cur_iteration = 0;
-            for (auto idx = 0; idx < sample_size; idx++){
-                if (1 - objs[idx] < THRESHOLD){
-                    nrc_cols_cur_iteration++;
-                }
-            }
-            if (get_wall_time() - start_time > cutoff)
-                break;
-        }
+        this->make_prediction();
+        this->_run();
     }
 
 
-    void MLPH::run_iteration(int ith_iteration){
+    void MLPH::_run(){
         long time_seed = current_time_for_seeding();        
 
         mt19937 mt(time_seed);
@@ -366,25 +345,6 @@ namespace GCP {
                     neg_rc_cols.push_back(sample);
                     neg_rc_vals.push_back(1-obj);
                     identites.insert(identity);
-            }
-
-            // replace worst solution
-            if (variant == METHOD_TYPE::BP_MLPH_PLUS){
-                if (!duplicate){
-                    auto min_obj = 1e10; 
-                    int min_idx = -1;
-                    for (auto l = 0; l < sample_size; l++){
-                        if (objs[l] < min_obj){
-                            min_obj = objs[l];
-                            min_idx = l;
-                        }
-                    }
-                    if (obj > objs[min_idx]){   
-                        objs[min_idx] = obj;
-                        mis_set[min_idx].resize(sample.size());
-                        std::copy(sample.begin(), sample.end(), mis_set[min_idx].begin());
-                    }
-                }
             }
         }
     }

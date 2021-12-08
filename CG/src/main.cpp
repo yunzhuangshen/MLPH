@@ -133,33 +133,13 @@ int test(int method, int benchmark, int d, int column_selection, int seed, strin
             // return 0;
         }
 
-        ofstream output_file_sampling_stats;
-        ofstream* output_file_sampling_stats_ptr;
-        // check close output_file_sampling_stats
-        if (method >=4 && method <= 7){
-            string output_sampling_stats_filename;
-            output_sampling_stats_filename = output_dir + input_file_name + "_sampling_stats.csv";
-            output_file_sampling_stats.open(output_sampling_stats_filename);
-            if (output_file_sampling_stats.is_open()){
-                output_file_sampling_stats <<"ith_cg_iter,ith_mlph_iter,#neg_rc,best_rc\n";
-            } else{
-                cout << "Cannot open the output file " + output_sampling_stats_filename << endl;
-                // return 0;
-            }
-            output_file_sampling_stats_ptr = &output_file_sampling_stats;
-        } else if (method >= 8 && method <= 13)
-            output_file_sampling_stats_ptr = nullptr;
-        else{
-            cout << "ERROR: at main test()\n";
-            assert(false);
-        }
 
         auto cg = CG(instance, cutoff, cutoff_pricer, thread_limit, seed);
         cout << "\n\n\nPROBLEM INSTANCE:" << input_file_name <<"\n";
         cout << "SOLVING ROOT LP BY CG\n"; 
         auto w0 = get_wall_time(); auto c0 = get_cpu_time();
 
-        cg.test(method, column_selection, output_file_sampling_stats_ptr, &output_file_cg_stats);
+        cg.test(method, column_selection, &output_file_cg_stats);
         
         cout << "ROOT LP SOLVED - STATS:\n";
         auto wall_time_CG = get_wall_time() - w0 - cg.time_computing_lagrangian_bound;
@@ -177,14 +157,10 @@ int test(int method, int benchmark, int d, int column_selection, int seed, strin
                 << cg.cg_iters << "," << cg.num_mis - instance.size()*10 << "," 
                 << cg.num_heur_runs_success << "\n";
         
-        if (method >= 4 && method == 7){
-            assert(output_file_sampling_stats_ptr != nullptr);
-            output_file_sampling_stats.close();
-            output_file_sampling_stats_ptr=nullptr;
-        }
         output_file_cg_stats.close();
         output_file_solving_stats.close(); 
     }
+    return 0;
 }
 
 
@@ -207,9 +183,6 @@ int main(int argc, char* argv[]) {
         int cs = 0;
         switch (method)
         {
-
-        // case 4: output_dir = "mlph++nsga2_cs" + string(argv[4]) + "/seed_" + seed + "/"; break;
-        // case 5: output_dir = "mlph++_cs" + string(argv[4])  + "/seed_" + seed + "/"; break;
         case 6: 
             cs = stoi(argv[4]);
             output_dir += "mlph_cs" + to_string(cs) + "/seed_" + seed + "/"; break;

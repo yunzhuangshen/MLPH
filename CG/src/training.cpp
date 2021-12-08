@@ -27,7 +27,7 @@ namespace GCP {
             auto g = Instance(training_files[d], input_dir, true);
             auto n = g.size();
             
-            const vector<vector<int>>& adj_list = g.get_adj_list();
+            const vector<vector<int>>& adj_list = g.adj_list;
             vector<vector<bool>> adj_matrix(n, vector<bool>(n, 0));
             for (int i = 0; i < n; ++i){
                 for (int j = 0; j < adj_list[i].size(); ++j){
@@ -36,8 +36,8 @@ namespace GCP {
                 }
             }
 
-            std::cout << "number of pricing problems: " << g.ninst << "\n";
-            for (auto inst_idx = 0; inst_idx < g.ninst; inst_idx++){
+            std::cout << "number of pricing problems: " << g.nb_pp << "\n";
+            for (auto inst_idx = 0; inst_idx < g.nb_pp; inst_idx++){
                 std::vector<double>& cur_mis_obj_coef = g.mis_obj_coefs[inst_idx];
                 std::vector<bool>& cur_mis_opt_sol = g.mis_sols[inst_idx];
 

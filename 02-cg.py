@@ -98,7 +98,9 @@ def test_column_selection():
 if __name__ =='__main__':
     
 
-    nCPUs = 4; # should be multiples of 4 
+    nCPUs = 8; # should be multiples of 4 for testing on large graphs
+
+    os.system(f'mkdir CG/build; cd CG/build && cmake ../ && make')
     test_pricing_methods(SMALL_GRAPHS)
     test_pricing_methods(LARGE_GRAPHS)
     test_column_selection()

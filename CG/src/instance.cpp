@@ -21,11 +21,11 @@ namespace GCP {
                 collect_train_data(opt_file_name);
         }
         if (is_file_exist(opt_file_name.c_str()))
-            read_mis_sols(opt_file_name);
+            load_training_data(opt_file_name);
     }
 
 
-    void Instance::read_mis_sols(std::string read_from){
+    void Instance::load_training_data(std::string read_from){
 
         ifstream opt_file(read_from);
         string line;
@@ -52,8 +52,8 @@ namespace GCP {
             }
             ctr++;
         }
+        nb_pp=ctr/2.;
         opt_file.close();
-        ninst=ctr/2.;
     }
 
     void Instance::collect_train_data(std::string save_to){
@@ -81,99 +81,6 @@ namespace GCP {
         opt_file.close();
     }
 
-    void Instance::read_all_optimal_solution(){
-        string opt_file_name = input_dir + file_name + ".allsol";
-        ifstream opt_file(opt_file_name);
-        if (!opt_file){
-            cout << "optimal solution is not provided" << endl;
-            return;
-        }
-        string line;
-        bool READ_Point = 0;
-        int node;
-        int n0 = 0;
-        int n1 = 1;
-        while(!opt_file.eof()) {
-            getline(opt_file, line);
-            if (line == "EOF" || line == "-1") {
-                break;
-            }
-            if (READ_Point){
-                std::stringstream stream(line);
-                while (stream >> node) {
-                    optimal_value.push_back(node);
-                    if (node == 0){
-                        n0++;
-                    }
-                    if (node == 1){
-                        n1++;
-                    }
-                }
-            }
-            if (line == "SET_INDEX"){
-                READ_Point = 1;
-            }
-        }
-        optimal_ratio = (float) n1 / (n0+n1);
-        cout << "n0 is " << n0 << ", n1 is " << n1 << endl;
-
-    }
-
-    void Instance::read_optimal_solution(){
-        string opt_file_name = input_dir + file_name + ".sol";
-        ifstream opt_file(opt_file_name);
-        if (!opt_file){
-            cout << "optimal solution is not provided" << endl;
-            return;
-        }
-        string line;
-        vector<int> opt_sets;
-        bool READ_Point = 0;
-        int node;
-        while(!opt_file.eof()) {
-            getline(opt_file, line);
-            if (line == "EOF" || line == "-1") {
-                break;
-            }
-            if (READ_Point){
-                std::stringstream stream(line);
-                while (stream >> node) {
-                    opt_sets.push_back(node);
-                }
-            }
-            if (line == "SET_INDEX"){
-                READ_Point = 1;
-            }
-        }
-        int opt_obj = opt_sets.size();
-        optimal_value = vector<bool>(n_sets, 0);
-        int s;
-        for (int i = 0; i < opt_sets.size(); ++i){
-            s = opt_sets[i];
-            optimal_value[s] = 1;
-        }
-
-        // verify if the solution is optimal
-        vector<bool> covered_vertex(n_nodes, 0);
-        int num_vertex_covered = 0;
-        int v;
-        for (int i = 0; i < opt_sets.size(); ++i){
-            s = opt_sets[i];
-            for (int j = 0; j < mis_sets[s].size(); ++j){
-                v = mis_sets[s][j];
-                if (covered_vertex[v] == 0){
-                    covered_vertex[v] = 1;
-                    num_vertex_covered++;
-                }
-            }
-        }
-        if (num_vertex_covered == n_nodes){
-            cout << "optimal objective value is " << opt_obj << endl;
-        } else{
-            cout << "the mis sets provided are not feasible" << endl;
-            assert(num_vertex_covered == n_nodes);
-        }
-    }
 
     void Instance::read_graph(){
         string input_file = input_dir  + file_name + ".col";
@@ -200,16 +107,6 @@ namespace GCP {
                     adj_list[v2-1].push_back(v1-1);
                     ne++;
                 }
-                // for (idx = 0; idx < adj_list[v1-1].size(); ++idx){
-                //     if (adj_list[v1-1][idx] == v2 - 1){
-                //         break;
-                //     }
-                // }
-                // if (idx == adj_list[v1-1].size()){
-                //     adj_list[v1-1].push_back(v2-1);
-                //     adj_list[v2-1].push_back(v1-1);
-                //     ne++;
-                // }
             }
         }
 
@@ -224,85 +121,8 @@ namespace GCP {
                 max_node_degree_norm = degree_norm[i];
             }
         }
-//        cout << "Computing degree_norm done" << endl;
         n_edges = ne;
         cout << "number of undirected edges is " << n_edges << endl;
-    }
-
-
-    void Instance::compute_problem_specific_features(){
-        set_size = vector<int>(n_sets, 0.0);
-        max_set_degree_norm = vector<float>(n_sets, 0.0);
-        ave_set_degree_norm = vector<float>(n_sets, 0.0);
-        min_set_degree_norm = vector<float>(n_sets, 1.0);
-        std_set_degree_norm = vector<float>(n_sets, 0.0);
-        max_set_size = 0;
-        int v;
-        for (int i = 0; i < n_sets; ++i){
-            set_size[i] = mis_sets[i].size();
-            if (max_set_size < set_size[i]){
-                max_set_size = set_size[i];
-            }
-            for (int j = 0; j < set_size[i]; ++j){
-                v = mis_sets[i][j];
-                ave_set_degree_norm[i] += degree_norm[v] / set_size[i];
-                if (max_set_degree_norm[i] < degree_norm[v]){
-                    max_set_degree_norm[i] = degree_norm[v];
-                }
-                if (min_set_degree_norm[i] > degree_norm[v]){
-                    min_set_degree_norm[i] = degree_norm[v];
-                }
-            }
-            for (int j = 0; j < set_size[i]; ++j){
-                v = mis_sets[i][j];
-                std_set_degree_norm[i] += pow(degree_norm[v] - ave_set_degree_norm[i], 2) / set_size[i];
-            }
-            std_set_degree_norm[i] = sqrt(std_set_degree_norm[i]);
-        }
-
-
-        vector<double> node_max_set_size(n_nodes, 0.0);
-        vector<double> node_min_set_size(n_nodes, max_set_size);
-        vector<double> node_ave_set_size(n_nodes, 0.0);
-        int s;
-        for (int i = 0; i < n_nodes; ++i){
-            for (int j = 0; j < node_to_sets[i].size(); ++j){
-                s = node_to_sets[i][j];
-                node_ave_set_size[i] += (double) mis_sets[s].size() / node_to_sets[i].size();
-                if (node_max_set_size[i] < mis_sets[s].size()){
-                    node_max_set_size[i] = mis_sets[s].size();
-                }
-                if (node_min_set_size[i] > mis_sets[s].size()){
-                    node_min_set_size[i] = mis_sets[s].size();
-                }
-            }
-        }
-
-
-        max_rel_set_size = vector<float>(n_sets, 0.0);
-        ave_rel_set_size = vector<float>(n_sets, 0.0);
-        min_rel_set_size = vector<float>(n_sets, 1.0);
-        std_rel_set_size = vector<float>(n_sets, 0.0);
-        double relative_size;
-        for (int i = 0; i < n_sets; ++i){
-            for (int j = 0; j < set_size[i]; ++j){
-                v = mis_sets[i][j];
-                relative_size = (double) set_size[i] / node_max_set_size[v];
-                ave_rel_set_size[i] += relative_size / set_size[i];
-                if (max_rel_set_size[i] < relative_size){
-                    max_rel_set_size[i] = relative_size;
-                }
-                if (min_rel_set_size[i] > relative_size){
-                    min_rel_set_size[i] = relative_size;
-                }
-            }
-            for (int j = 0; j < set_size[i]; ++j){
-                v = mis_sets[i][j];
-                relative_size = (double) set_size[i] / node_max_set_size[v];
-                std_rel_set_size[i] += pow(relative_size - ave_rel_set_size[i], 2) / set_size[i];
-            }
-            std_rel_set_size[i] = sqrt(std_rel_set_size[i]);
-        }
     }
 
 }

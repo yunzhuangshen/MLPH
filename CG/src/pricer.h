@@ -28,8 +28,6 @@ public:
     int upper_col_limit;
 
     vector<double> dual_values;
-    std::vector<double> best_rc_current_iteration;
-    std::vector<long> num_neg_rc_current_iteration;
     double heur_best_reduced_cost;
     const double INF = 1e8;
 
@@ -62,24 +60,12 @@ public:
 
     void compute_statistics();
 
-    double calc_dist(vector<int>& col1, vector<int>& col2);
-    double calc_dist_kmeans(vector<double>& centroid, vector<int>& point);
-
     void include_new_cols(std::vector<std::vector<int>>& basic_cols, vector<int>& lb_vbasis);
-    void include_new_cols_all(std::vector<std::vector<int>>& basic_cols);
+    
+    void add_all(std::vector<std::vector<int>>& basic_cols);
+    void add_partial(std::vector<std::vector<int>>& basic_cols);
+    void replace_existing(vector<vector<int>>& basic_cols, vector<int>& lb_vbasis );
 
-    void include_new_cols_nrc_greedy(std::vector<std::vector<int>>& basic_cols, vector<int>& lb_vbasis);
-    void include_new_cols_nrc_greedy_all(std::vector<std::vector<int>>& basic_cols, vector<int>& lb_vbasis);
-
-    void include_new_cols_nrc_sampling(vector<vector<int>>& basic_cols);
-    void include_new_cols_random_sampling(vector<vector<int>>& basic_cols);
-    void include_new_cols_random_sampling_all(vector<vector<int>>& basic_cols, vector<int>& lb_vbasis );
-
-
-    void include_new_cols_hierarchical_clustering(std::vector<std::vector<int>>& basic_cols);
-    void include_new_cols_hierarchical_clustering_all(std::vector<std::vector<int>>& basic_cols, vector<int>& lp_basis);
-    // void include_new_cols_my_hierarchical_clustering(vector<vector<int>>& basic_cols);
-    // void include_new_cols_kmeans(vector<vector<int>>& basic_cols);
 };
 
 }

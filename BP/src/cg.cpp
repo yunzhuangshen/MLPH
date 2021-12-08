@@ -43,7 +43,6 @@
 #include "cg.h"
 #include "BP/reader_col.h"
 #include "BP/cons_storeGraph.h"
-// #include "pricing/ACO.h"
 #include "pricing/MLPH.h"
 #include "pricing/heur_pricer_misc.h"
 #include "pricing/exact_pricer.h"
@@ -373,19 +372,11 @@ SCIP_DECL_PRICERREDCOST(pricerRedcostColoring)
    bool is_root = SCIPnodeGetNumber(SCIPgetCurrentNode(scip)) == SCIPnodeGetNumber(SCIPgetRootNode(scip));
 
    if (pricerdata->method_type==METHOD_TYPE::BP_MLPH || 
-         pricerdata->method_type==METHOD_TYPE::BP_MLPH_FORCE_EXACT || 
-         pricerdata->method_type==METHOD_TYPE::BP_MLPH_PLUS){
+         pricerdata->method_type==METHOD_TYPE::BP_MLPH_FORCE_EXACT){
          my_pricer = new GCP::MLPH(is_root, pricerdata->method_type, pricerdata->cutoff_pricing_heur, inst, pricerdata->sample_factor);            
-   // }else if (pricerdata->method_type == METHOD_TYPE::ACO){
-   //       my_pricer = new GCP::ACO(pricerdata->cutoff_pricing_heur, inst);
    }else if (
         pricerdata->method_type==METHOD_TYPE::BP_DEF||
         pricerdata->method_type==METHOD_TYPE::BP_None 
-      //   || pricerdata->method_type==METHOD_TYPE::GUROBI || 
-      //   pricerdata->method_type==METHOD_TYPE::GUROBI_HEUR||
-      //   pricerdata->method_type==METHOD_TYPE::TSM||
-      //   pricerdata->method_type==METHOD_TYPE::FASTWCLQ||
-      //   pricerdata->method_type==METHOD_TYPE::LSCC
         ){
       my_pricer = new GCP::Heur_pricer_misc(pricerdata->method_type, pricerdata->cutoff_pricing_heur, inst);         
    }else{
@@ -416,25 +407,25 @@ SCIP_DECL_PRICERREDCOST(pricerRedcostColoring)
 
    // force SSSP to use exact to tackle tail off effect
    // cout << "LP objective: " << SCIPgetLPObjval(scip) << "\n";
-   bool force_mlcg = false;
+   bool force_mlph = false;
    double best_pricing_obj = 1;
    vector<vector<int>> neg_rc_cols;
    vector<double> neg_rc_vals;
 
-   force_mlcg = pricerdata->method_type==METHOD_TYPE::BP_MLPH_FORCE_EXACT &&
+   force_mlph = pricerdata->method_type==METHOD_TYPE::BP_MLPH_FORCE_EXACT &&
        !my_pricer->neg_rc_cols.empty() &&
        pricerdata->low_lp_obj_improve_count >= 5 &&
        pricerdata->low_lp_obj_improve_count % 5 == 0; 
    
-   if (force_mlcg){
+   if (force_mlph){
       best_pricing_obj = my_pricer->best_obj;
       neg_rc_cols = my_pricer->neg_rc_cols;
       neg_rc_vals = my_pricer->neg_rc_vals;
-      cout << "force MLCG!\n";
+      cout << "force mlph!\n";
    }
 
 
-   use_exact = force_mlcg || my_pricer->neg_rc_cols.empty();
+   use_exact = force_mlph || my_pricer->neg_rc_cols.empty();
 
    t0 = get_wall_time();
    /* solve using an exact method */ 
@@ -445,7 +436,7 @@ SCIP_DECL_PRICERREDCOST(pricerRedcostColoring)
       if (t<=0) t=0.001;
       // std::cout << "use_exact: " << t << "\n";
 
-      my_pricer = new GCP::Exact_pricer(pricerdata->exact_type, t, inst, pricerdata, best_pricing_obj);
+      my_pricer = new GCP::Exact_pricer(t, inst, pricerdata, best_pricing_obj);
       my_pricer->run();
       GCP::Exact_pricer* exact_pricer = dynamic_cast<GCP::Exact_pricer*>(my_pricer);
       is_exact_optimal = exact_pricer->isOptimal;
@@ -471,7 +462,7 @@ SCIP_DECL_PRICERREDCOST(pricerRedcostColoring)
    if (*stopearly == TRUE){
       *result = SCIP_DIDNOTRUN;
    }else if (my_pricer->neg_rc_cols.size()>0){
-      if (force_mlcg){
+      if (force_mlph){
          my_pricer->neg_rc_cols.insert(my_pricer->neg_rc_cols.end(),neg_rc_cols.begin(), neg_rc_cols.end());
          my_pricer->neg_rc_vals.insert(my_pricer->neg_rc_vals.end(),neg_rc_vals.begin(), neg_rc_vals.end());
       }
@@ -583,7 +574,6 @@ SCIP_DECL_PRICERFARKAS(pricerFarkasColoring)
 SCIP_RETCODE SCIPincludePricerColoring(
    SCIP*                 scip,                /**< SCIP data structure */
    METHOD_TYPE           method_type,
-   EXACT_PRICER          exact_type,
    double                cutoff_bp,
    double                cutoff_pricing_heur, 
    double                sample_factor, 
@@ -597,7 +587,6 @@ SCIP_RETCODE SCIPincludePricerColoring(
    // SCIP_CALL( SCIPallocBlockMemory(scip, &pricerdata) );
    pricerdata->scip = scip;
    pricerdata->method_type = method_type;
-   pricerdata->exact_type = exact_type;
    pricerdata->sample_factor = sample_factor;
    pricerdata->root_column_limit_factor = root_column_limit_factor;
    pricerdata->child_column_limit_factor = child_column_limit_factor;

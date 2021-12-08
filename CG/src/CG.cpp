@@ -38,7 +38,7 @@ namespace GCP {
         num_mis = mis_factor * g.size();
         cout << "number of MISs generated is " <<num_mis << endl;
         mis_set.resize(num_mis);
-        adj_list = g.get_adj_list();
+        adj_list = g.adj_list;
         adj_matrix = vector<vector<bool>>(g.size(), vector<bool>(g.size(), 0));
         for (int i = 0; i < g.size(); ++i){
             for (int j = 0; j < adj_list[i].size(); ++j){
@@ -190,62 +190,6 @@ namespace GCP {
         return tsm.isOptimal;
     }
 
-    void CG::collect_training_data(vector<vector<double>>& obj_coef, vector<vector<bool>>& solution){
-        initializing_mis();
-
-        min_reduced_cost_exact = -1.0;
-
-        while(min_reduced_cost_exact < -0.000001){
-            
-            cout << "solving restricted master problem\n";
-            solve_restricted_master_problem(false);
-            cout << "solving pricing problem\n";
-            solve_mwis_tsm(1e8, min_reduced_cost_exact);
-            // record training data
-            if (cg_iters % 5==0){
-
-                vector<bool> opt_sol(g.size(), false);
-                for (auto v : optimal_mis){
-                    opt_sol[v]=true;
-                }
-
-                obj_coef.push_back(dual_value);
-                solution.push_back(opt_sol);
-            }
-
-            // add new columns
-            mis_set.push_back(optimal_mis);
-            cout << "minimum reduced cost is " << min_reduced_cost_exact << endl;
-
-            if (cg_iters++>=25) break;
-        }
-    }
-
-
-    double CG::optimize_LM(int method, double b0, double b1){
-        double start_time = get_wall_time();
-
-        initializing_mis();
-        min_reduced_cost_exact = -1.0;
-
-        double t0;
-        double duration;
-        t0 = get_wall_time();
-        solve_restricted_master_problem(false);
-        duration = get_wall_time()-t0;
-        time_duration_master += duration;
-        cout << "time used: " << duration << "\n";
-        cout << "solve pricing mwis by mlph \n";
-        t0 = get_wall_time();
-        MLPH mlph(method, b0, b1, g.size(), g.size(), g.degree_norm, adj_matrix, dual_value, g.size());
-        mlph.run();
-        duration = get_wall_time()-t0;
-        cout << "time used: " << duration << "\n";
-        time_duration_pricing_heur += duration;
-        cout << "minimum reduced cost by mlph is: " << mlph.best_rc << endl;
-        return mlph.best_rc;
-    }
-
     bool CG::solve_mwis_gurobi(double cutoff, double& min_rc) {
 
         if (cutoff <= 0)
@@ -308,7 +252,64 @@ namespace GCP {
         return mwis_optimal;
     }
 
-    void CG::test(int method, int column_selection, std::ofstream* output_file_sampling_stats, std::ofstream* output_file_cg_stats){
+    void CG::collect_training_data(vector<vector<double>>& obj_coef, vector<vector<bool>>& solution){
+        initializing_mis();
+
+        min_reduced_cost_exact = -1.0;
+
+        while(min_reduced_cost_exact < -0.000001){
+            
+            cout << "solving restricted master problem\n";
+            solve_restricted_master_problem(false);
+            cout << "solving pricing problem\n";
+            solve_mwis_tsm(1e8, min_reduced_cost_exact);
+            // record training data
+            if (cg_iters % 5==0){
+
+                vector<bool> opt_sol(g.size(), false);
+                for (auto v : optimal_mis){
+                    opt_sol[v]=true;
+                }
+
+                obj_coef.push_back(dual_value);
+                solution.push_back(opt_sol);
+            }
+
+            // add new columns
+            mis_set.push_back(optimal_mis);
+            cout << "minimum reduced cost is " << min_reduced_cost_exact << endl;
+
+            if (cg_iters++>=25) break;
+        }
+    }
+
+
+    double CG::optimize_LM(int method, double b0, double b1){
+        double start_time = get_wall_time();
+
+        initializing_mis();
+        min_reduced_cost_exact = -1.0;
+
+        double t0;
+        double duration;
+        t0 = get_wall_time();
+        solve_restricted_master_problem(false);
+        duration = get_wall_time()-t0;
+        time_duration_master += duration;
+        cout << "time used: " << duration << "\n";
+        cout << "solve pricing mwis by mlph \n";
+        t0 = get_wall_time();
+        MLPH mlph(method, b0, b1, g.size(), g.size(), g.degree_norm, adj_matrix, dual_value, g.size());
+        mlph.run();
+        duration = get_wall_time()-t0;
+        cout << "time used: " << duration << "\n";
+        time_duration_pricing_heur += duration;
+        cout << "minimum reduced cost by mlph is: " << mlph.best_rc << endl;
+        return mlph.best_rc;
+    }
+
+
+    void CG::test(int method, int column_selection, std::ofstream* output_file_cg_stats){
         
         double start_time = get_wall_time();
         int upper_col_limit = g.size();
@@ -338,7 +339,7 @@ namespace GCP {
             t0 = get_wall_time();
             Pricer* pricer = nullptr;
             
-            if (method >= 3 && method <= 6){
+            if (method == 6){
                 pricer = new MLPH(method, pricer_cutoff, g.size(), g.size(), g.degree_norm, adj_matrix, dual_value, upper_col_limit);            
             }else if (method == 7){
                 pricer = new ACO(method, pricer_cutoff, g.size(), g.get_nb_edges(), 30, 
@@ -352,13 +353,6 @@ namespace GCP {
             }
             pricer->column_selection = column_selection;
             pricer->run();                  
-            if (output_file_sampling_stats!=nullptr){
-                for (auto i = 0; i < pricer->niterations; i++){
-                    (*output_file_sampling_stats) << cg_iters << "," << i+1 << "," 
-                                    << pricer->num_neg_rc_current_iteration[i] << ","
-                                    << pricer->best_rc_current_iteration[i] << "\n";
-                }
-            } 
             
             duration = get_wall_time()-t0;
             cout << "time used: " << duration << "\n";
@@ -380,14 +374,22 @@ namespace GCP {
                 cout << "time budget remaining as cutoff time for solving mwis: " << cutoff - (t0 - start_time) << "\n";
                 mwis_optimal = solve_mwis_tsm(mwis_cutoff, min_reduced_cost_exact);
                 // mwis_optimal = solve_mwis_gurobi(1e8, min_reduced_cost_exact);
-                cout << "minimum reduced cost by exact solver is: " << min_reduced_cost_exact << endl;
+
+                if (mwis_optimal){
+                    cout << "minimum reduced cost by exact solver is: " << min_reduced_cost_exact << endl;
+                    // add new columns
+                    if (min_reduced_cost_exact < -0.000001){
+                        mis_set.push_back(optimal_mis);
+                        num_mis++;
+                    }
+
+                }else{
+                    cout << "reaching cutoff when executing exact solver!\n";
+                }
+
                 duration = get_wall_time()-t0;
                 cout << "time used: " << duration << "\n";
                 time_duration_pricing_exact += duration;
-
-                // add new columns
-                mis_set.push_back(vector<int> (optimal_mis));
-                num_mis++;
             }
 
             if (output_file_cg_stats!=nullptr){

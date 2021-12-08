@@ -41,12 +41,7 @@
 #include <vector>
 #include <string>
 enum METHOD_TYPE{
-   BP_DEF=0, BP_None=1, BP_MLPH=2, BP_MLPH_FORCE_EXACT=3, BP_MLPH_PLUS=4,
-   ACO=5, GUROBI=6, GUROBI_HEUR=7,TSM=8,FASTWCLQ=9,LSCC=10, 
-};
-
-enum EXACT_PRICER{
-   TCLIQUE=0, EXACT_TSM=1, EXACT_GUROBI=2
+   BP_DEF=0, BP_None=1, BP_MLPH=2, BP_MLPH_FORCE_EXACT=3
 };
 
 #ifdef __cplusplus
@@ -74,7 +69,6 @@ struct SCIP_PricerData
    SCIP_Real        lowerbound;              /* lower bound computed by the pricer */
    
    METHOD_TYPE      method_type;               /* the heuristic method to use */
-   EXACT_PRICER     exact_type;
    SCIP_Real        cutoff_pricing_heur;             /* the cutoff time of the heuristic pricer*/
    SCIP_Real        bp_cutoff;
    double           sample_factor; 
@@ -96,7 +90,6 @@ extern
 SCIP_RETCODE SCIPincludePricerColoring(
    SCIP*                 scip,                /**< SCIP data structure */
    METHOD_TYPE           method_type,
-   EXACT_PRICER          exact_type,
    double                cutoff_bp,
    double                cutoff_pricing, 
    double                sample_factor, 

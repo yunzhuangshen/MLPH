@@ -23,8 +23,6 @@ namespace GCP {
         niterations = floor(nb_node*5/3);
         cout << "aco iteration: " << niterations << "\n";
         sample_size=nb_node;
-        best_rc_current_iteration = vector<double>(niterations);
-        num_neg_rc_current_iteration = vector<long>(niterations);
         heur_best_reduced_cost = 1;
         compute_bound();
         max_dual = 0.;
@@ -56,21 +54,9 @@ namespace GCP {
         tau = vector<double>(nb_node, 1.);
         for (auto i = 0; i < nb_node; i++)
             tau[i] += dual_values[i];
-        // tau = vector<double>(nb_node, 0.1);
-        // for (auto i = 0; i < nb_node; i++)
-        //     tau[i] += dual_values[i];
-
+      
         for (auto i = 0; i < niterations; ++i){
             this->run_iteration(i);
-            num_neg_rc_col = 0;
-            for (auto idx = 0; idx < sample_size; idx++){
-                if (1 - objs[idx] < THRESHOLD){
-                    num_neg_rc_col++;
-                }
-            }
-            // cout << "iter: " << i << ", best obj: " << best_obj << "\n";
-            best_rc_current_iteration[i] = heur_best_reduced_cost;
-            num_neg_rc_current_iteration[i] = num_neg_rc_col;
             if (get_wall_time() - start_time > cutoff)
                 break;
 

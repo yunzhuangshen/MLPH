@@ -82,5 +82,7 @@ def optimize_logistic_model():
 
 
 if __name__ == '__main__':
-    # train_svm_linear()
+
+    os.system(f'mkdir CG/build; cd CG/build && cmake ../ && make')
+    train_svm_linear()
     optimize_logistic_model()

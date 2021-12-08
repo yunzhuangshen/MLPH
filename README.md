@@ -1,10 +1,11 @@
-# A Machine-Learning-Based Pricing Heuristic for Column Generation
+# Enhancing Column Generation by a Machine-Learning-BasedPricing Heuristic for Graph Coloring (to appear at AAAI 2022)
 
-This repository holds the code for using brand-and-price to solve the graph coloring problem. We propose a machine-learning-based heuristic pricing method to accelarate the progress of column generation. The code is organized as follows:
+We propose a machine-learning-based heuristic pricing method to accelarate the progress of column generation. Our code is mainly written in C++ and is organized as follows:
 
-- GCB, containing Graph Coloring Benchmarks
-- CG, containing c++ code for column generation and python code for analyzing the results.
-- BP, containing c++ code for branch-and-price and python code for analyzing the results.
+- GCB folder contains Graph Coloring Benchmarks
+- CG folder contains code for column generation.
+- BP folder contains code for branch-and-price.
+
 
 ## Requirements
 The C++ code can then be built with cmake (version >= 3.10) with:
@@ -18,11 +19,11 @@ The python code requires:
 - scipy 
 - bayesian-optimization - https://github.com/fmfn/BayesianOptimization 
 
+
 ## Run scrips to reproduce results:
 1. python3 01-train-and-optimize.py
 2. python3 02-cg.py (nCPUs $\in [4,8,12...]$)
 3. python3 03-bp.py (nCPUs $\in [1,2,3,...]$)
-
 
 For the second and third step, you can specificy the number of available CPUs in the python script.
 

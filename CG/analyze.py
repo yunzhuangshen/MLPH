@@ -1,10 +1,8 @@
 from utils import *
-from make_gstats_table import make_gstats_table
 from make_compare_table import make_compare_table
 from make_solving_table import make_solving_table
 from make_rc_table import make_rc_table
 from make_cg_table import make_cg_table
-from make_iteration_pricing_table import make_iteration_pricing_table
 import pathlib
 
 def solving_curve(seeds, methods, method_rets, inst_names, outdir_name, interval=5):
@@ -234,7 +232,6 @@ def analyse_small(prefix):
     make_solving_table(seeds, methods, method_rets, inst_names, dest_dir)
     make_rc_table(seeds, methods, method_rets, inst_names, dest_dir)
     make_cg_table(seeds, methods, method_rets, inst_names, dest_dir)
-    make_iteration_pricing_table(seeds, methods, method_rets, inst_names, dest_dir)
     solving_curve(seeds, methods, method_rets, inst_names, dest_dir)
     lp_curve(seeds, methods, method_rets, inst_names, GEOMETRIC, dest_dir)
 

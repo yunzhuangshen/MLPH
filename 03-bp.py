@@ -3,7 +3,6 @@ sys.path.append('BP/')
 from math import floor
 from BP.analyze import analyze,analyze_MLPH_variants
 
-nCPUs = 1
 BP_DEF=0; BP_None=1; BP_MLPH=2; BP_MLPH_FORCE_EXACT=3
 seeds = [i for i in range(1, 25)]
 insts = ['1-FullIns_4', '1-FullIns_5', '1-Insertions_4', '1-Insertions_5', '2-FullIns_4', '2-FullIns_5', '2-Insertions_3', '2-Insertions_4', '2-Insertions_5', '3-FullIns_4', '3-FullIns_5', '3-Insertions_3', '3-Insertions_4', '3-Insertions_5', '4-FullIns_4', '4-FullIns_5', '4-Insertions_3', '4-Insertions_4', '5-FullIns_4', 'DSJC1000.9', 'DSJC125.1', 'DSJC125.5', 'DSJC125.9', 'DSJC250.5', 'DSJC250.9', 'DSJC500.9', 'DSJR500.1c', 'DSJR500.5', 'ash331GPIA', 'ash608GPIA', 'flat300_20_0', 'flat300_26_0', 'flat300_28_0', 'latin_square_10', 'le450_15a', 'le450_15b', 'le450_25a', 'le450_25b', 'le450_25c', 'le450_25d', 'le450_5c', 'le450_5d', 'myciel5', 'myciel6', 'myciel7', 'qg.order100', 'qg.order30', 'qg.order40', 'qg.order60', 'queen10_10', 'queen11_11', 'queen12_12', 'queen13_13', 'queen14_14', 'queen15_15', 'queen16_16', 'queen9_9', 'r1000.1c', 'r1000.5', 'r125.5', 'r250.5', 'school1', 'school1_nsh', 'wap05a', 'wap06a', 'will199GPIA'] 
@@ -102,8 +101,8 @@ def test_variants():
 
 
 if __name__ =='__main__':
-    
-    nCPUs = 8; 
+    global nCPUs
+    nCPUs = 4; 
     os.system(f'mkdir BP/build; cd BP/build && cmake ../ && make')
     test(); test_variants(); 
     analyze(prefix='./BP/')

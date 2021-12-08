@@ -3,19 +3,19 @@ sys.path.append('CG/')
 from math import floor
 from CG.analyze import analyze
 
-nCPUs = 1
 SMALL_GRAPHS=0; LARGE_GRAPHS=1
 MLPH=6; ACO=7; TSM=8; LSCC=9; FASTWCLQ=10; GUROBI=11; GUROBI_HEUR=12
 ADD_PARTIAL=0; ADD_ALL=1; REPLACE_EXISTING=5
 seeds = [i for i in range(1, 25)]
 
 def test_pricing_methods(graph_type):
-
+    global nCPUs
     if graph_type == SMALL_GRAPHS:
         test_methods = [MLPH, ACO, TSM, LSCC, FASTWCLQ, GUROBI, GUROBI_HEUR]
+        nProcesses = nCPUs
     else:
         test_methods = [MLPH, ACO, FASTWCLQ, GUROBI, GUROBI_HEUR]
-        nCPUs = max(1, nCPUs//4) # large graphs require 4 CPUs each run
+        nProcesses = max(1, nCPUs//4) # large graphs require 4 CPUs each run
 
     pairs = [(test_method, seed) for test_method in test_methods for seed in seeds]
     nb_runs = len(pairs)
@@ -38,7 +38,7 @@ def test_pricing_methods(graph_type):
                 nb_finished+=1
         
         # execute new runs
-        while len(proc_pool) < nCPUs and hasNext:
+        while len(proc_pool) < nProcesses and hasNext:
             item = next(pairs,None)
             hasNext = item is not None
             if hasNext:
@@ -57,7 +57,9 @@ def test_pricing_methods(graph_type):
         
 
 def test_column_selection():
-    nCPUs = max(1, nCPUs//4) # large graphs require 4 CPUs each run
+    global nCPUs
+
+    nProcesses = max(1, nCPUs//4) # large graphs require 4 CPUs each run
     cs_methods = [ADD_ALL, REPLACE_EXISTING]
     pairs = [(test_method, seed) for test_method in cs_methods for seed in seeds]
     nb_runs = len(pairs)
@@ -79,7 +81,7 @@ def test_column_selection():
                 nb_finished+=1
 
         # execute new runs
-        while len(proc_pool) < nCPUs and hasNext:
+        while len(proc_pool) < nProcesses and hasNext:
             item = next(pairs,None)
             hasNext = item is not None
             if hasNext:
@@ -97,8 +99,8 @@ def test_column_selection():
 
 if __name__ =='__main__':
     
-
-    nCPUs = 8; # should be multiples of 4 for testing on large graphs
+    global nCPUs
+    nCPUs = 4; # should be multiples of 4 for testing on large graphs
 
     os.system(f'mkdir CG/build; cd CG/build && cmake ../ && make')
     test_pricing_methods(SMALL_GRAPHS)

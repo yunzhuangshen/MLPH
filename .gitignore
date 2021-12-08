@@ -1,8 +1,6 @@
 **/build/*
 __pycache__
-README-full.md
 .DS_Store
-
 BO.json
 archive
 results_cg
@@ -10,3 +8,4 @@ results_bp
 results
 results_large
 results_small
+svm_train_model

@@ -85,15 +85,6 @@ using namespace std;
         cout << "column selection time: " << duration << "\n";
     }
 
-    vector<double> Pricer::compute_nrc(vector<vector<int>>& basic_cols){
-        vector<double> nrcs(basic_cols.size(), 1);
-        for (auto i = 0; i < basic_cols.size(); i++){
-            for (auto v : basic_cols[i]){
-                nrcs[i] -= dual_values[v];
-            }
-        }
-        return nrcs;
-    }
 
     // complexity: O(n)
     void Pricer::add_all(vector<vector<int>>& basic_cols){

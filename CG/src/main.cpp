@@ -37,13 +37,14 @@ static double get_wall_time(){
 
 //extremely large instances not included: "wap03a", "wap04a", "C4000.5"
 vector<string> file_name{
+"queen16_16", \
 "1-FullIns_4", "1-FullIns_5", "2-FullIns_4", "2-FullIns_5", "3-FullIns_4", "3-FullIns_5", "4-FullIns_4", "5-FullIns_4", \
 "1-Insertions_4", "1-Insertions_5", "1-Insertions_6", "2-Insertions_3", "2-Insertions_4", "2-Insertions_5", "3-Insertions_3", "3-Insertions_4", "3-Insertions_5", "4-Insertions_3", "4-Insertions_4", \
 "DSJC1000.1", "DSJC1000.5", "DSJC1000.9", "DSJC125.1", "DSJC125.5", "DSJC125.9", "DSJC250.1", "DSJC250.5", "DSJC250.9", "DSJC500.1", "DSJC500.5", "DSJC500.9", \
 "flat1000_50_0", "flat1000_60_0", "flat1000_76_0", "flat300_20_0", "flat300_26_0", "flat300_28_0", \
 "le450_15a", "le450_15b", "le450_15c", "le450_15d", "le450_25a", "le450_25c", "le450_25d", "le450_5a", "le450_5b", "le450_5c", "le450_5d", \
 "queen10_10", "queen11_11", "queen12_12", "queen13_13", "queen14_14", "queen15_15", "queen16_16", "queen8_8", "queen9_9", \
-"wap01a", "wap02a", "wap05a", "wap06a", "wap07a", "wap08a", \
+"wap05a", "wap06a", "wap07a", "wap08a", \
 "mug100_1", "mug100_25", "mug88_1", "mug88_25", "myciel4", "myciel5", "myciel6", "myciel7", \
 "r1000.1", "r1000.1c", "r1000.5", "r125.5", "r250.5", "will199GPIA", \
 "DSJR500.1c", "DSJR500.5", "abb313GPIA", "ash608GPIA", "school1", "school1_nsh", 
@@ -92,14 +93,14 @@ void train_logistic_model(double b0, double b1){
     ret_file.close();
 }
 
-int test(int method, int benchmark, int d, int column_selection, int seed, string output_dir){
+void test(int method, int benchmark, int d, int column_selection, int seed, string output_dir){
 
     if (benchmark==0){
             cutoff=1800;
             cutoff_pricer=30;
             thread_limit=1;
     }else if(benchmark==1){
-            file_name = {"wap03a", "wap04a", "C4000.5","4-FullIns_5","ash958GPIA", "C2000.5"};
+            file_name = {"wap01a", "wap02a", "wap03a", "wap04a", "C4000.5","4-FullIns_5","ash958GPIA", "C2000.5"};
             cutoff=8000;
             cutoff_pricer=150;
             thread_limit=4;
@@ -160,7 +161,6 @@ int test(int method, int benchmark, int d, int column_selection, int seed, strin
         output_file_cg_stats.close();
         output_file_solving_stats.close(); 
     }
-    return 0;
 }
 
 

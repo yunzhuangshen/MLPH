@@ -47,8 +47,6 @@ public:
     //only for mssp-all and mssp-dominance selection
     double dominate_selection_time=0;
 
-    vector<double> compute_nrc(vector<vector<int>>& basic_cols);
-
     virtual ~Pricer(){};
     virtual void run(){std::cout << "error, in pricer!!!\n\n";};
 

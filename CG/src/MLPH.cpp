@@ -27,6 +27,7 @@ namespace GCP {
         c2=-4.631979340281991;
         c3=-1.5341779416628611;
         c4=5.4064285368308;
+        b=0;
 
         // read svm.param if exists
         std::ifstream svm_param_file("../../svm.param");
@@ -68,9 +69,9 @@ namespace GCP {
         assert(method==6);
         nb_node = _n;
         cutoff = _cutoff;
-        sample_size = _sample_size;
+        sample_size = 50*_sample_size;
         upper_col_limit = _upper_col_limit;
-        niterations = 50;
+        niterations = 1;
         heur_best_reduced_cost = 1;
 
         c0=1.6557295690309566;
@@ -78,6 +79,7 @@ namespace GCP {
         c2=-4.631979340281991;
         c3=-1.5341779416628611;
         c4=5.4064285368308;
+        b=0;
         //1-1.0/(1+e^(9.775*x-12.5564))
         b0 = -9.775;
         b1 = -12.5564;

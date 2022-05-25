@@ -107,4 +107,3 @@ if __name__ =='__main__':
     test_pricing_methods(LARGE_GRAPHS)
     test_column_selection()
     analyze(prefix='./CG/')
-

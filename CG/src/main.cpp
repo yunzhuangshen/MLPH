@@ -37,7 +37,6 @@ static double get_wall_time(){
 
 //extremely large instances not included: "wap03a", "wap04a", "C4000.5"
 vector<string> file_name{
-"queen16_16", \
 "1-FullIns_4", "1-FullIns_5", "2-FullIns_4", "2-FullIns_5", "3-FullIns_4", "3-FullIns_5", "4-FullIns_4", "5-FullIns_4", \
 "1-Insertions_4", "1-Insertions_5", "1-Insertions_6", "2-Insertions_3", "2-Insertions_4", "2-Insertions_5", "3-Insertions_3", "3-Insertions_4", "3-Insertions_5", "4-Insertions_3", "4-Insertions_4", \
 "DSJC1000.1", "DSJC1000.5", "DSJC1000.9", "DSJC125.1", "DSJC125.5", "DSJC125.9", "DSJC250.1", "DSJC250.5", "DSJC250.9", "DSJC500.1", "DSJC500.5", "DSJC500.9", \

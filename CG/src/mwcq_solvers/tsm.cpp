@@ -1935,7 +1935,6 @@ void TSM::store_maximal_weighted_clique() {
 	MAX_CLQ_SIZE = CUR_CLQ_SIZE + 1;
 
 	MAX_CLQ_WEIGHT = CUR_CLQ_WEIGHT + CUR_NODE_WEIGHT;
-	printf("store_maximal_weighted_clique()\n");
 
 	// printf("C %8d |%12lld |%8d %10d %12d %12d|%10d %10.2lf \n", Cursor_Stack[0] + 1, MAX_CLQ_WEIGHT, cut_ver, cut_inc, cut_iset, cut_satz, BRANCHING_COUNT, get_utime() - READ_TIME - INIT_TIME);
 	// fflush(stdout);

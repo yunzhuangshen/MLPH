@@ -457,7 +457,7 @@ void TSM::sort_by_degree_degeneracy_ordering() {
 				// std::cout << NB_NODE << " " << Candidate_Stack[i] << " " << Top_Weight[Candidate_Stack[i]] << "\n"; 
 				assert(Candidate_Stack[i] <= NB_NODE);
 			}
-			printf("I initial clique weight: %lld\n", INIT_CLQ_WEIGHT);
+			// printf("I initial clique weight: %lld\n", INIT_CLQ_WEIGHT);
 			break;
 		}
 
@@ -1935,6 +1935,7 @@ void TSM::store_maximal_weighted_clique() {
 	MAX_CLQ_SIZE = CUR_CLQ_SIZE + 1;
 
 	MAX_CLQ_WEIGHT = CUR_CLQ_WEIGHT + CUR_NODE_WEIGHT;
+	printf("store_maximal_weighted_clique()\n");
 
 	// printf("C %8d |%12lld |%8d %10d %12d %12d|%10d %10.2lf \n", Cursor_Stack[0] + 1, MAX_CLQ_WEIGHT, cut_ver, cut_inc, cut_iset, cut_satz, BRANCHING_COUNT, get_utime() - READ_TIME - INIT_TIME);
 	// fflush(stdout);
@@ -2049,6 +2050,23 @@ void TSM::store_maximal_weighted_clique2() {
 	MAX_CLQ_SIZE = CUR_CLQ_SIZE;
 
 	MAX_CLQ_WEIGHT = MAX_CLQ_WEIGHT + CUR_NODE_WEIGHT;
+
+	sol_objs.push_back(MAX_CLQ_WEIGHT);
+	sol_times.push_back(get_utime() - READ_TIME - INIT_TIME);
+	std::vector<int> sol;
+
+	if (INIT_CLQ_WEIGHT < MAX_CLQ_WEIGHT) {
+		for (int i = 0; i < MAX_CLQ_SIZE; i++) {
+			sol.push_back(Old_Name[MaxCLQ_Stack[i]]-1);
+		}
+	} else {
+		for (int i = 0; i < MAX_CLQ_SIZE; i++) {
+			sol.push_back(MaxCLQ_Stack[i]-1);
+		}
+	}
+
+	sols.push_back(sol);
+
 
 	// printf("C %8d |%12lld |%8d %10d %12d %12d|%10d %10.2lf\n", Cursor_Stack[0] + 1, MAX_CLQ_WEIGHT, cut_ver, cut_inc, cut_iset, cut_satz, BRANCHING_COUNT, get_utime() - READ_TIME - INIT_TIME);
 	total_cut_ver += cut_ver;
